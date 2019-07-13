@@ -71,13 +71,40 @@ class Application(HubListener):
     def data_collection(self):
         return self.session.data_collection
 
-    def new_data_viewer(self, viewer_class, data=None, state=None):
+    def new_data_viewer(self, viewer_class, data=None, state=None,
+                        tab=None):
         """
         Create a new data viewer, add it to the UI,
         and populate with data
+
+        Properties
+        ----------
+        viewer_class :  glue.utils.noconflict._ToolbarInitializerwrappertyp
+            Type of viewer to create.
+        data : [BaseData, Subset], optional
+            A collection or subset of data to tadd to the viewer.
+            If not provided the resulting viewer will be empty.
+        state : MatplotlibState, optional
+            State of the viewer.
+        tab : int, optional
+            Index of the tab to add `data_viewer`. Defaults
+            to the current tab.
+
+        Returns
+        -------
+        c : glue.utils.noconflict._ToolbarInitializerwrappertyp
+            The `viewer_class` with data and widget added.
         """
         if viewer_class is None:
             return
+
+        if tab is not None:
+            if tab >= self.tab_count or tab < 0:
+                self.report_error(message=f'Invalid tab number {tab}.',
+                                  detail=('Trying to access a tab that does not '
+                                          'exits. Call GlueApplication.new_tab() '
+                                          'to create tabs.'))
+                return
 
         if state is not None:
             c = viewer_class(self._session, state=state)
@@ -94,7 +121,7 @@ class Application(HubListener):
                 c.close(warn=False)
                 return
 
-        self.add_widget(c)
+        self.add_widget(c, tab=tab)
         return c
 
     @catch_error("Failed to save session")

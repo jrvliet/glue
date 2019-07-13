@@ -638,6 +638,16 @@ class GlueApplication(Application, QtWidgets.QMainWindow):
                     self.new_tab()
                     tab = self.tab_count - 1
 
+        else:
+            if tab >= self.tab_count or tab < 0:
+                # Trying to add to a tab that doesn't exist
+                # Report error, suggest user adds a tab
+                self.report_error(message='Invalid tab number',
+                                  detail=('Trying to access a tab that does not '
+                                          'exits. Call GlueApplication.new_tab() '
+                                          'to create tabs.'))
+                return
+
         page = self.tab(tab)
         pos = getattr(new_widget, 'position', None)
         sub = new_widget.mdi_wrap()
@@ -1008,8 +1018,10 @@ class GlueApplication(Application, QtWidgets.QMainWindow):
         return self.do(cmd)
 
     @defer_draw
-    def new_data_viewer(self, viewer_class, data=None, state=None):
-        viewer = super(GlueApplication, self).new_data_viewer(viewer_class, data=data, state=state)
+    def new_data_viewer(self, viewer_class, data=None, state=None, tab=None):
+        viewer = super(GlueApplication, self).new_data_viewer(viewer_class,
+                                                              data=data,
+                                                              state=state, tab=tab)
         if viewer is not None:
             viewer.show()
         return viewer
